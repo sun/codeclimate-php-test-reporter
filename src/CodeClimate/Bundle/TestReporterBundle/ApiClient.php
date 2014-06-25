@@ -1,8 +1,10 @@
 <?php
 namespace CodeClimate\Bundle\TestReporterBundle;
 
-use Guzzle\Http\Client;
-use Guzzle\Http\Exception\ClientErrorResponseException;
+use GuzzleHttp\Client;
+use GuzzleHttp\Stream;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ClientErrorResponseException;
 
 class ApiClient
 {
@@ -27,10 +29,12 @@ class ApiClient
 
         $request->setHeader("User-Agent", "Code Climate (PHP Test Reporter v".Version::VERSION.")");
         $request->setHeader("Content-Type", "application/json");
-        $request->setBody($json);
+        $request->setBody(Stream\create($json));
 
         try {
             $response = $this->client->send($request);
+        } catch (ClientException $e) {
+            $response = $e->getResponse();
         } catch (ClientErrorResponseException $e) {
             $response = $e->getResponse();
         }
